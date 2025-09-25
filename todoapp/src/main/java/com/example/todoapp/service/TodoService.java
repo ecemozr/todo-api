@@ -1,11 +1,11 @@
 package com.example.todoapp.service;
 
+import com.example.todoapp.exception.NotFoundException;
 import com.example.todoapp.model.Todo;
 import com.example.todoapp.repository.TodoRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class TodoService {
@@ -20,31 +20,36 @@ public class TodoService {
         return todoRepository.findAll();
     }
 
-    public Optional<Todo> getTodoById(Long id) {
-        return todoRepository.findById(id);
+    public Todo getTodoById(Long id) { // Optional yerine doğrudan Todo döndürür
+        return todoRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(id));
     }
 
     public Todo createTodo(Todo todo) {
         return todoRepository.save(todo);
     }
 
-    public Optional<Todo> updateTodo(Long id, Todo updatedTodo) {
-        return todoRepository.findById(id).map(todo -> {
-            // Artık bu metotlar elle eklendiği için hata vermeyecek:
-            if (updatedTodo.getTitle() != null) {
-                todo.setTitle(updatedTodo.getTitle());
-            }
-            if (updatedTodo.getDescription() != null) {
-                todo.setDescription(updatedTodo.getDescription());
-            }
-            if (updatedTodo.isCompleted()) {
-                todo.setCompleted(updatedTodo.isCompleted());
-            }
-            return todoRepository.save(todo);
-        });
+    public Todo updateTodo(Long id, Todo updatedTodo) {
+        return todoRepository.findById(id)
+                .map(todo -> {
+                    if (updatedTodo.getTitle() != null) {
+                        todo.setTitle(updatedTodo.getTitle());
+                    }
+                    if (updatedTodo.getDescription() != null) {
+                        todo.setDescription(updatedTodo.getDescription());
+                    }
+                    if (updatedTodo.isCompleted()) {
+                        todo.setCompleted(updatedTodo.isCompleted());
+                    }
+                    return todoRepository.save(todo);
+                })
+                .orElseThrow(() -> new NotFoundException(id));
     }
 
     public void deleteTodo(Long id) {
+        if (!todoRepository.existsById(id)) {
+            throw new NotFoundException(id);
+        }
         todoRepository.deleteById(id);
     }
 }
