@@ -2,7 +2,6 @@ package com.example.todoapp.service;
 
 import com.example.todoapp.model.Todo;
 import com.example.todoapp.repository.TodoRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,8 +10,11 @@ import java.util.Optional;
 @Service
 public class TodoService {
 
-    @Autowired
-    private TodoRepository todoRepository;
+    private final TodoRepository todoRepository;
+
+    public TodoService(TodoRepository todoRepository) {
+        this.todoRepository = todoRepository;
+    }
 
     public List<Todo> getAllTodos() {
         return todoRepository.findAll();
@@ -28,9 +30,16 @@ public class TodoService {
 
     public Optional<Todo> updateTodo(Long id, Todo updatedTodo) {
         return todoRepository.findById(id).map(todo -> {
-            todo.setTitle(updatedTodo.getTitle());
-            todo.setDescription(updatedTodo.getDescription());
-            todo.setCompleted(updatedTodo.isCompleted());
+            // Artık bu metotlar elle eklendiği için hata vermeyecek:
+            if (updatedTodo.getTitle() != null) {
+                todo.setTitle(updatedTodo.getTitle());
+            }
+            if (updatedTodo.getDescription() != null) {
+                todo.setDescription(updatedTodo.getDescription());
+            }
+            if (updatedTodo.isCompleted()) {
+                todo.setCompleted(updatedTodo.isCompleted());
+            }
             return todoRepository.save(todo);
         });
     }
