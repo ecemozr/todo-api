@@ -2,40 +2,45 @@ package com.example.todoapp.controller;
 
 import com.example.todoapp.model.Todo;
 import com.example.todoapp.service.TodoService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/todos")
 public class TodoController {
 
-    @Autowired
-    private TodoService todoService;
+    private final TodoService todoService;
+
+    public TodoController(TodoService todoService) {
+        this.todoService = todoService;
+    }
 
     @GetMapping
-    public List<Todo> getAllTodos() {
-        return todoService.getAllTodos();
+    public ResponseEntity<List<Todo>> getAllTodos() {
+        return ResponseEntity.ok(todoService.getAllTodos());
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Todo> getTodoById(@PathVariable Long id) {
-        Optional<Todo> todo = todoService.getTodoById(id);
-        return todo.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        // Servis metodu NotFoundException'ı fırlattığı için burada Optional kontrolüne gerek yok
+        Todo todo = todoService.getTodoById(id);
+        return ResponseEntity.ok(todo);
     }
 
     @PostMapping
-    public Todo createTodo(@RequestBody Todo todo) {
-        return todoService.createTodo(todo);
+    public ResponseEntity<Todo> createTodo(@Valid @RequestBody Todo todo) {
+        return new ResponseEntity<>(todoService.createTodo(todo), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Todo> updateTodo(@PathVariable Long id, @RequestBody Todo todoDetails) {
-        Optional<Todo> updatedTodo = todoService.updateTodo(id, todoDetails);
-        return updatedTodo.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<Todo> updateTodo(@PathVariable Long id, @Valid @RequestBody Todo updatedTodo) {
+        // Servis metodu NotFoundException fırlatacağı için burada Optional kontrolüne gerek yok
+        Todo todo = todoService.updateTodo(id, updatedTodo);
+        return ResponseEntity.ok(todo);
     }
 
     @DeleteMapping("/{id}")
