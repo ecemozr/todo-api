@@ -1,9 +1,9 @@
-package com.example.todoapp.service;
-
-import com.example.todoapp.exception.DuplicateException;
-import com.example.todoapp.exception.NotFoundException;
-import com.example.todoapp.model.Todo;
-import com.example.todoapp.repository.TodoRepository;
+package com.example.todo.service;
+import com.example.todo.exception.DuplicateException;
+import com.example.todo.exception.NotFoundException;
+import com.example.todo.model.Todo;
+import com.example.todo.repository.TodoRepository;
+import com.example.todo.TodoappApplication;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
@@ -12,9 +12,11 @@ import java.util.Optional;
 public class TodoService {
 
     private final TodoRepository todoRepository;
+    private final TodoappApplication todoappApplication;
 
-    public TodoService(TodoRepository todoRepository) {
+    public TodoService(TodoRepository todoRepository, TodoappApplication todoappApplication) {
         this.todoRepository = todoRepository;
+        this.todoappApplication = todoappApplication;
     }
 
     public List<Todo> findAll() {
